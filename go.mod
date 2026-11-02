@@ -1,3 +1,3 @@
-module github.com/msdrepo/folcon
+module github.com/msdrepo/framework
 
 go 1.26.10
