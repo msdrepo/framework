@@ -32,7 +32,11 @@ func (engine *Engine) addRoute(method string, path string, handlers HandlersChai
 // ServeHTTP satisfies the http.Handler interface
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	key := req.Method + ":" + req.URL.Path
+
 	if handlers, exists := engine.routes[key]; exists {
+
+		debugPrintRoute(req.Method, req.URL.Path, handlers)
+
 		c := &Context{
 			Writer:   w,
 			Request:  req,
@@ -43,6 +47,8 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("404 - Page Not Found"))
+
+		LogPrint("[404 Not Found] %s %s", req.Method, req.URL.Path)
 	}
 }
 
