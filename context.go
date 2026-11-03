@@ -1,6 +1,7 @@
 package folcon
 
 import (
+	"encoding/json"
 	"net/http"
 )
 
@@ -14,15 +15,28 @@ type Context struct {
 	index    int
 }
 
+func (c *Context) String(code int, format string, values ...any) {
+	c.Writer.WriteHeader(code)
+	c.Writer.Write([]byte(format))
+}
+
+// JSON writes any data structure as a JSON response
+func (c *Context) JSON(code int, data interface{}) {
+
+	c.Writer.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	c.Writer.WriteHeader(code)
+
+	encoder := json.NewEncoder(c.Writer)
+	if err := encoder.Encode(data); err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 // Next allows running the next middleware in the chain
 func (c *Context) Next() {
 	c.index++
 	if c.index < len(c.handlers) {
 		c.handlers[c.index](c)
 	}
-}
-
-func (c *Context) String(code int, format string, values ...any) {
-	c.Writer.WriteHeader(code)
-	c.Writer.Write([]byte(format))
 }
