@@ -40,3 +40,14 @@ func (c *Context) Next() {
 		c.handlers[c.index](c)
 	}
 }
+
+// BindJSON parses the request body JSON into the given struct pointer
+func (c *Context) BindJSON(obj interface{}) error {
+	decoder := json.NewDecoder(c.Request.Body)
+	return decoder.Decode(obj)
+}
+
+// Query gets URL query parameters (e.g. ?name=augustin)
+func (c *Context) Query(key string) string {
+	return c.Request.URL.Query().Get(key)
+}
