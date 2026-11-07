@@ -6,10 +6,17 @@ import (
 	"strings"
 )
 
-// validate required dynamically checks struct fields for 'binding:"required"' tag
-func ValidateRequired(s interface{}) map[string]string {
-
+// ValidateRequired parses JSON and dynamically checks struct fields for 'binding:"required"' tag
+func (c *Context) ValidateRequired(s interface{}) map[string]string {
 	errors := make(map[string]string)
+
+	// 1. Context-ல் உள்ள BindJSON மெதட்டை சரியாக அழைத்தல்
+	if err := c.BindJSON(s); err != nil {
+		errors["json_error"] = err.Error()
+		return errors
+	}
+
+	// 2. ரிப்ளெக்சன் வேலிடேஷன் லாஜிக்
 	val := reflect.ValueOf(s)
 
 	if val.Kind() == reflect.Ptr {
@@ -26,7 +33,7 @@ func ValidateRequired(s interface{}) map[string]string {
 		fieldVal := val.Field(i)
 		fieldType := typ.Field(i)
 
-		// 'binding:"required"'
+		// 'binding:"required"' டேக்கைச் சரிபார்த்தல்
 		bindingTag := fieldType.Tag.Get("binding")
 		if strings.Contains(bindingTag, "required") {
 
