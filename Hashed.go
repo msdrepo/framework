@@ -1,14 +1,19 @@
 package folcon
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"errors"
 
+	"golang.org/x/crypto/bcrypt"
+)
+
+// VerifyPassword compares a plain password with a hashed password
 func VerifyPassword(password, hashedPassword string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return errors.New("invalid password")
+		}
 		return err
 	}
-
-	return err
-
+	return nil
 }
